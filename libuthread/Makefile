@@ -1,6 +1,23 @@
+CC      = gcc
+CFLAGS  = -Wall -Wextra -Werror
+CFLAGS += -g
+AR      = ar
+ARFLAGS = rcs
+
 # Target library
-lib := libuthread.a
+LIB     = libuthread.a
+OBJDIR  = .
+OBJS    = $(OBJDIR)/queue.o
 
-all: $(lib)
+all: $(LIB)
 
-## TODO: Phase 1
+$(OBJDIR)/%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(LIB): $(OBJS)
+	$(AR) $(ARFLAGS) $@ $^
+
+clean:
+	rm -f $(OBJS) $(LIB)
+
+.PHONY: all clean

@@ -5,6 +5,12 @@
 
 #include "queue.h"
 
+/*
+Resources:
+queue_tester_example.c
+https://web.stanford.edu/class/archive/cs/cs106b/cs106b.1188/lectures/Lecture6/Lecture6.pdf
+https://www.geeksforgeeks.org/queue-data-structure/
+*/
 void test_create(void)
 {
     queue_t q;

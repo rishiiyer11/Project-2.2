@@ -37,11 +37,9 @@ $(LIB): $(OBJS)
 
 -include $(DEPS)
 
-# queue tester lives in apps/
 queue_tester.x: ../apps/queue_tester_example.c $(LIB)
 	$(CC) $(CFLAGS) $< -L. -luthread -o $@
 
-# apps under apps/
 uthread_hello.x: ../apps/uthread_hello.c $(LIB)
 	$(CC) $(CFLAGS) $< -L. -luthread -o $@
 

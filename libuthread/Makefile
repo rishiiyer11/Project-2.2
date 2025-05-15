@@ -20,7 +20,9 @@ EXES    := \
 	sem_simple.x \
 	sem_count.x \
 	sem_buffer.x \
-	sem_prime.x 
+	sem_prime.x \
+	test_preempt.x
+
 
 .PHONY: all clean
 
@@ -55,6 +57,9 @@ sem_buffer.x: ../apps/sem_buffer.c $(LIB)
 	$(CC) $(CFLAGS) $< -L. -luthread -o $@
 
 sem_prime.x: ../apps/sem_prime.c $(LIB)
+	$(CC) $(CFLAGS) $< -L. -luthread -o $@
+
+test_preempt.x: ../apps/test_preempt.c $(LIB)
 	$(CC) $(CFLAGS) $< -L. -luthread -o $@
 
 clean:

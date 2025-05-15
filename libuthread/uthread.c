@@ -56,7 +56,7 @@ int uthread_create(uthread_func_t func, void *arg)
 	}
 
     tcb->stack = malloc(UTHREAD_STACK_SIZE);
-	if (tcb->stack) {
+	if (!tcb->stack) {
 		free(tcb);
 		return -1;
 	}
@@ -96,7 +96,7 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
 	}
 
 	/* scheduler loop w/ dequeue, run, repeat */
-	while (!queue_length(ready_queue)) {
+	while (queue_length(ready_queue) > 0) {
 		struct uthread_tcb *next_thread = NULL;
 		queue_dequeue(ready_queue, (void**)&next_thread);
 		current_thread = next_thread;

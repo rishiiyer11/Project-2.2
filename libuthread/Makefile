@@ -1,23 +1,35 @@
-CC      = gcc
-CFLAGS  = -Wall -Wextra -Werror
-CFLAGS += -g
-AR      = ar
-ARFLAGS = rcs
+CC       := gcc
+AR       := ar
+CFLAGS   := -Wall -Wextra -Werror -I. -MMD -MP
+ARFLAGS  := rcs
 
-# Target library
-LIB     = libuthread.a
-OBJDIR  = .
-OBJS    = $(OBJDIR)/%.o
+LIB      := libuthread.a
+SRCS     := queue.c uthread.c sem.c
+OBJS     := $(SRCS:.c=.o)
+DEPS     := $(OBJS:.o=.d)
 
-all: $(LIB)
+APPS     := queue_tester.x \
+            uthread_hello.x \
+            uthread_yield.x \
+            sem_simple.x \
+            sem_count.x \
+            sem_buffer.x \
+            sem_prime.x
 
-$(OBJDIR)/%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+.PHONY: all clean
+
+all: $(LIB) $(APPS)
 
 $(LIB): $(OBJS)
 	$(AR) $(ARFLAGS) $@ $^
 
-clean:
-	rm -f $(OBJS) $(LIB)
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-.PHONY: all clean
+-include $(DEPS)
+
+%.x: ../apps/%.c $(LIB)
+	$(CC) $(CFLAGS) ../apps/$*.c -L. -luthread -o $@
+
+clean:
+	rm -f $(OBJS) $(DEPS) $(LIB) $(APPS)

@@ -23,6 +23,7 @@ static ucontext_t scheduler_ctx;
 static struct uthread_tcb *current_thread = NULL;
 
 static void thread_start(uthread_func_t func, void *arg) {
+    preempt_enable();
 	func(arg);
 	uthread_exit();
 }
@@ -32,12 +33,14 @@ struct uthread_tcb *uthread_current(void) {
 
 void uthread_yield(void)
 {
+    preempt_disable();
 	queue_enqueue(ready_queue, current_thread);
 	swapcontext(&current_thread->context, &scheduler_ctx);
 }
 
 void uthread_exit(void)
 {
+    preempt_disable();
 	free(current_thread->stack);
 	free(current_thread);
 	current_thread = NULL;
@@ -109,10 +112,14 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
 void uthread_block(void)
 {
 	/* TODO Phase 3 */
+    preempt_disable();
     swapcontext(&current_thread->context, &scheduler_ctx);
+    preempt_enable();
 }
 
 void uthread_unblock(struct uthread_tcb *uthread)
 {
+    preempt_disable();
     queue_enqueue(ready_queue, uthread);
+    preempt_enable();
 }

@@ -7,7 +7,7 @@ ARFLAGS = rcs
 # Target library
 LIB     = libuthread.a
 OBJDIR  = .
-OBJS    = $(OBJDIR)/queue.o
+OBJS    = $(OBJDIR)/%.o
 
 all: $(LIB)
 

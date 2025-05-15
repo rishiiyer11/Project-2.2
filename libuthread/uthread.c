@@ -10,28 +10,29 @@
 #include "uthread.h"
 #include "queue.h"
 
+#define UTHREAD_STACK_SIZE (64 * 1024)
+
 struct uthread_tcb {
-	ucontext_t conetext;
+	ucontext_t context;
 	void *stack;
 };
 
 static queue_t *ready_queue = NULL;
-static uncontext_t schedulter_ctx;
+static ucontext_t scheduler_ctx;
 static struct uthread_tcb *current_thread = NULL;
 
 static void thread_start(uthread_func_t, void *arg) {
 	func(arg);
 	uthread_exit();
 }
-struct uthread_tcb *uthread_current(void)
-{
-	return current_thread
+struct uthread_tcb *uthread_current(void) {
+	return current_thread;
 }
 
 void uthread_yield(void)
 {
 	queue_enqueue(ready_queue, current_thread);
-	swapcontext(&current_thread->conetext, &schedulter_ctx);
+	swapcontext(&current_thread->context, &scheduler_ctx);
 }
 
 void uthread_exit(void)
@@ -39,22 +40,22 @@ void uthread_exit(void)
 	free(current_thread->stack);
 	free(current_thread);
 	current_thread = NULL;
-	setcontext(&schedulter_ctx);
+	setcontext(&scheduler_ctx);
 }
 
 int uthread_create(uthread_func_t func, void *arg)
 {
-	struct uthread_tcb *tcb - malloc(sizeof(*tcb));
+	struct uthread_tcb *tcb = malloc(sizeof(*tcb));
 	if (tcb == NULL) {
 		return -1;
 	}
 
-	if(getcontext(&tcb->conetext) < 0) {
+	if(getcontext(&tcb->context) < 0) {
 		free(tcb);
 		return -1;
 	}
 
-	tcb->stack = malloc(UTHREAD_STACK_SIZE);
+    tcb->stack = malloc(UTHREAD_STACK_SIZE);
 	if (tcb->stack) {
 		free(tcb);
 		return -1;
@@ -80,7 +81,7 @@ int uthread_create(uthread_func_t func, void *arg)
 int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
 	/* TODO Phase 2 */
-	void(preempt);
+	(void)preempt;
 
 	/* make run_queue */
 	ready_queue = queue_create();
@@ -96,9 +97,10 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
 
 	/* scheduler loop w/ dequeue, run, repeat */
 	while (!queue_empty(ready_queue)) {
-		struct uthread_tcb *next_in_queue = queue_dequeue(ready_queue);
-		current_thread = next;
-		swarpcontext(&scheduler_ctx, &next->context);
+		struct uthread_tcb *next_thread = NULL;
+		queue_dequeue(ready_queue, (void**)&next_thread);
+		current_thread = next_thread;
+		swapcontext(&scheduler_ctx, &next_thread->context);
 	}
 
 	/* clean up */

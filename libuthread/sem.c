@@ -33,7 +33,10 @@ int sem_destroy(sem_t sem)
 	/* TODO Phase 3 */
 	assert(sem != NULL);
     /* no threads should still be waiting */
-    assert(queue_length(sem->wait_queue));
+	void *zombie;
+	while (queue_length(sem->wait_queue) > 0) {
+		queue_dequeue(sem->wait_queue, &zombie);
+	}
     queue_destroy(sem->wait_queue);
     free(sem);
     return 0;
@@ -45,9 +48,11 @@ int sem_down(sem_t sem)
 	assert(sem != NULL);
     sem->count--;
     if (sem->count < 0) {
-        /* blocks the current thread */
-        queue_enqueue(sem->wait_queue, uthread_current());
-        uthread_block();
+        // block until we really have the resource
+        do {
+            queue_enqueue(sem->wait_queue, uthread_current());
+            uthread_block();
+        } while (sem->count < 0);
     }
     return 0;
 }
@@ -58,10 +63,10 @@ int sem_up(sem_t sem)
 	assert(sem != NULL);
     sem->count++;
     if (sem->count <= 0) {
-        /* wake one waiting thread */
-        struct uthread_tcb *next = NULL;
-        queue_dequeue(sem->wait_queue, (void**)&next);
-        uthread_unblock(next);
+        // wake exactly one waiter
+        void *next;
+        queue_dequeue(sem->wait_queue, &next);
+        uthread_unblock((struct uthread_tcb*)next);
     }
     return 0;
 }

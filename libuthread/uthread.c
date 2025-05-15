@@ -17,11 +17,11 @@ struct uthread_tcb {
 	void *stack;
 };
 
-static queue_t *ready_queue = NULL;
+static queue_t ready_queue = NULL;
 static ucontext_t scheduler_ctx;
 static struct uthread_tcb *current_thread = NULL;
 
-static void thread_start(uthread_func_t, void *arg) {
+static void thread_start(uthread_func_t func, void *arg) {
 	func(arg);
 	uthread_exit();
 }
@@ -96,7 +96,7 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
 	}
 
 	/* scheduler loop w/ dequeue, run, repeat */
-	while (!queue_empty(ready_queue)) {
+	while (!queue_length(ready_queue)) {
 		struct uthread_tcb *next_thread = NULL;
 		queue_dequeue(ready_queue, (void**)&next_thread);
 		current_thread = next_thread;
@@ -112,10 +112,10 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
 void uthread_block(void)
 {
 	/* TODO Phase 3 */
-
+    swapcontext(&current_thread->context, &scheduler_ctx);
 }
 
 void uthread_unblock(struct uthread_tcb *uthread)
 {
-	/* TODO Phase 3 */
+    queue_enqueue(ready_queue, uthread);
 }

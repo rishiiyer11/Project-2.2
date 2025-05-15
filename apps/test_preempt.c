@@ -4,20 +4,16 @@
 #include <stdbool.h>
 
 #include <uthread.h>
-/*
-#define TEST_DURATION 3
-#define PRINT_INTERVAL 10
 
 static volatile int busyCnt = 0;
 static volatile int printCnt = 0;
 
-
+/*
 Resources:
 https://www.geeksforgeeks.org/preemptive-and-non-preemptive-scheduling/
 https://www.gnu.org/software/libc/manual/2.36/html_mono/libc.html#Blocking-Signals
 */
 
-/*
 static void busy_thread(void *arg)
 {
     (void)arg;
@@ -39,7 +35,7 @@ static void print_thread(void *arg)
     printf("print thread start\n");
     
     for (int i = 0; i < 1000; i++) {
-        if (i % PRINT_INTERVAL == 0) {
+        if (i % 10 == 0) {
             printf("print thread iter %d busy = %d\n", i, busyCnt);
             printCnt++;
         }
@@ -50,7 +46,7 @@ static void print_thread(void *arg)
 
 int main(void)
 {
-    printf("start preempt test for %d secs\n", TEST_DURATION);
+    printf("start preempt test for %d secs\n", 3);
     
     bool preempt = true;
     
@@ -68,4 +64,3 @@ int main(void)
         return 1;
     }
 }
-*/

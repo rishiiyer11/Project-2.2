@@ -17,6 +17,7 @@ https://www.geeksforgeeks.org/preemptive-and-non-preemptive-scheduling/
 https://www.gnu.org/software/libc/manual/2.36/html_mono/libc.html#Blocking-Signals
 */
 
+/*
 static void busy_thread(void *arg)
 {
     (void)arg;
@@ -67,3 +68,4 @@ int main(void)
         return 1;
     }
 }
+*/

@@ -5,14 +5,14 @@
 
 #include <uthread.h>
 
-static volatile int busyCnt = 0;
-static volatile int printCnt = 0;
-
 /*
 Resources:
 https://www.geeksforgeeks.org/preemptive-and-non-preemptive-scheduling/
 https://www.gnu.org/software/libc/manual/2.36/html_mono/libc.html#Blocking-Signals
 */
+
+static volatile int busyCnt = 0;
+static volatile int printCnt = 0;
 
 static void busy_thread(void *arg)
 {

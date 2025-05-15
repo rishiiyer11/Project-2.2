@@ -48,7 +48,7 @@ int sem_down(sem_t sem)
 	assert(sem != NULL);
     sem->count--;
     if (sem->count < 0) {
-        // block until we really have the resource
+        /* block until we really have the resource */
         do {
             queue_enqueue(sem->wait_queue, uthread_current());
             uthread_block();
@@ -63,7 +63,7 @@ int sem_up(sem_t sem)
 	assert(sem != NULL);
     sem->count++;
     if (sem->count <= 0) {
-        // wake exactly one waiter
+        /* wake exactly one waiter */
         void *next;
         queue_dequeue(sem->wait_queue, &next);
         uthread_unblock((struct uthread_tcb*)next);

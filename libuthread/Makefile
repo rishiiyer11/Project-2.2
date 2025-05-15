@@ -8,7 +8,7 @@ ARFLAGS := rcs
 
 # library
 LIB     := libuthread.a
-SRCS    := queue.c uthread.c sem.c
+SRCS    := queue.c uthread.c sem.c preempt.c
 OBJS    := $(SRCS:.c=.o)
 DEPS    := $(SRCS:.c=.d)
 
@@ -36,11 +36,10 @@ $(LIB): $(OBJS)
 
 -include $(DEPS)
 
-
-# queue tester lives in tests/
+# queue tester lives in apps/
 queue_tester.x: ../apps/queue_tester_example.c $(LIB)
 	$(CC) $(CFLAGS) $< -L. -luthread -o $@
-	
+
 # apps under apps/
 uthread_hello.x: ../apps/uthread_hello.c $(LIB)
 	$(CC) $(CFLAGS) $< -L. -luthread -o $@

@@ -9,6 +9,7 @@
 #include "private.h"
 #include "uthread.h"
 #include "queue.h"
+#include "preempt.c"
 
 #define UTHREAD_STACK_SIZE (64 * 1024)
 
@@ -81,32 +82,28 @@ int uthread_create(uthread_func_t func, void *arg)
 int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
 	/* TODO Phase 2 */
-	(void)preempt;
+	preempt_start(preempt);
+    ready_queue = queue_create();
+    if (!ready_queue) return -1;
 
-	/* make run_queue */
-	ready_queue = queue_create();
-	if (ready_queue == NULL) {
-		return -1;
-	}
+    if (uthread_create(func, arg) < 0) {
+        queue_destroy(ready_queue);
+        return -1;
+    }
 
-	/* create first thread */
-	if (uthread_create(func, arg) < 0) {
-		queue_destroy(ready_queue);
-		return -1;
-	}
+    /* KEEP RUNNING WHILE THERE ARE THREADS IN THE QUEUE */
+    while (queue_length(ready_queue) > 0) {   // ← was “while (!queue_length(...))”
+        struct uthread_tcb *next = NULL;
+        queue_dequeue(ready_queue, (void**)&next);
+        current_thread = next;
+        if (preempt) preempt_enable();
+        swapcontext(&scheduler_ctx, &next->context);
+        if (preempt) preempt_disable();
+    }
 
-	/* scheduler loop w/ dequeue, run, repeat */
-	while (queue_length(ready_queue) > 0) {
-		struct uthread_tcb *next_thread = NULL;
-		queue_dequeue(ready_queue, (void**)&next_thread);
-		current_thread = next_thread;
-		swapcontext(&scheduler_ctx, &next_thread->context);
-	}
-
-	/* clean up */
-	queue_destroy(ready_queue);
-	ready_queue = NULL;
-	return 0;
+    preempt_stop();
+    ready_queue = NULL;
+    return 0;
 }
 
 void uthread_block(void)

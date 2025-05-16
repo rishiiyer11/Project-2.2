@@ -23,7 +23,8 @@ https://pages.cs.wisc.edu/~remzi/Classes/537/Fall2008/Projects/p2a.html
 /*
  * Frequency of preemption
  * 100Hz is 100 times per second
- */
+*/
+
 #define HZ 100
 #define USEC_PER_SEC 1000000
 

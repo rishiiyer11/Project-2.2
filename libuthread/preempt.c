@@ -25,6 +25,9 @@ https://pages.cs.wisc.edu/~remzi/Classes/537/Fall2008/Projects/p2a.html
  * 100Hz is 100 times per second
 */
 
+#define HZ 100
+#define USEC_PER_SEC 1000000
+
 /*
 static struct sigaction old_action;
 static struct itimerval  old_timer;
@@ -76,9 +79,6 @@ void preempt_stop(void)
     setitimer(ITIMER_VIRTUAL, &old_timer, NULL);
 }
 */
-
-#define HZ 100
-#define USEC_PER_SEC 1000000
 
 static struct sigaction ogAct;
 static struct itimerval  ogTime;

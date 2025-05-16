@@ -11,6 +11,7 @@ Resources:
 https://www.geeksforgeeks.org/preemptive-and-non-preemptive-scheduling/
 https://www.gnu.org/software/libc/manual/2.36/html_mono/libc.html#Blocking-Signals
 https://stackoverflow.com/questions/3417837/best-way-to-suppress-c-warning-unused-variable-x
+https://www.cprogramming.com/tutorial/common-multithreading-mistakes.html
 */
 
 // num iterations

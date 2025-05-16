@@ -3,7 +3,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#include <uthread.h>
+#include "uthread.h"
+#include "private.h"
 
 /*
 Resources:
@@ -12,56 +13,106 @@ https://www.gnu.org/software/libc/manual/2.36/html_mono/libc.html#Blocking-Signa
 https://stackoverflow.com/questions/3417837/best-way-to-suppress-c-warning-unused-variable-x
 */
 
-static volatile int busyCnt = 0;
-static volatile int printCnt = 0;
+// num iterations
+#define NUM_ITERS 1000000
 
-static void busy_thread(void *arg)
-{
-    (void)arg;
+// store thread exec
+volatile int seq[100];
+volatile int seqIndex = 0;
+volatile int completed = 0;
+
+// get TID
+void threadID(int TID) {
+    if (seqIndex < 100) {
+        seq[seqIndex++] = TID;
+    }
+}
+
+// busy func
+void busy(int iterations) {
+    volatile int counter = 0;
+    for (int i = 0; i < iterations; i++) {
+        counter++;
+    }
+}
+
+// thread func
+void tFunc(void *arg) {
+    int TID = *(int*)arg;
     
-    printf("busy thread start\n");
+    printf("Thread %d starting\n", TID);
     
-    while (1) {
-        for (volatile int i = 0; i < 100000; i++) {
-        }
+    // store TID
+    threadID(TID);
+    
+    // loop
+    for (int i = 0; i < 5; i++) {
+        // print
+        printf("Thread %d: iter %d\n", TID, i);
         
-        busyCnt++;
+        // busy idle
+        busy(NUM_ITERS / 10);
+        
+        // store thread again
+        threadID(TID);
     }
+    
+    printf("Thread %d done\n", TID);
+    completed++;
 }
 
-static void print_thread(void *arg)
-{
-    (void)arg;
+int main(void) {
+    int TID1 = 1;
+    int TID2 = 2;
+    int thread1, thread2;
+
+    // start pre
+    preempt_start(true);
     
-    printf("print thread start\n");
+    // create threads
+    thread1 = uthread_create(tFunc, &TID1);
+    if (thread1 < 0) {
+        fprintf(stderr, "fail to make t1\n");
+        exit(1);
+    }
     
-    for (int i = 0; i < 1000; i++) {
-        if (i % 10 == 0) {
-            printf("print thread iter %d busy = %d\n", i, busyCnt);
-            printCnt++;
+    thread2 = uthread_create(tFunc, &TID2);
+    if (thread2 < 0) {
+        fprintf(stderr, "fail to make t2\n");
+        exit(1);
+    }
+    
+    // wait
+    while (completed < 2) {
+    }
+    
+    // stop pre
+    preempt_stop();
+    
+    // print
+    printf("first %d thread switch:\n", seqIndex);
+    for (int i = 0; i < seqIndex; i++) {
+        printf("%d ", seq[i]);
+        if ((i + 1) % 10 == 0) {
+            printf("\n");
+        }
+    }
+    printf("\n");
+    
+    // check preempt
+    bool detPreempt = false;
+    for (int i = 1; i < seqIndex; i++) {
+        if (seq[i] != seq[i-1]) {
+            detPreempt = true;
+            break;
         }
     }
     
-    printf("thread done with %d prints\n", printCnt);
-}
-
-int main(void)
-{
-    printf("start preempt test for %d secs\n", 3);
-    
-    bool preempt = true;
-    
-    uthread_run(preempt, print_thread, NULL);
-    
-    printf("done.\n");
-    printf("busy loop count: %d\n", busyCnt);
-    printf("print thread msgs: %d\n", printCnt);
-    
-    if (busyCnt > 0 && printCnt > 0) {
-        printf("PASSED: threads progressed\n");
-        return 0;
+    if (detPreempt) {
+        printf("PASSED\n");
     } else {
-        printf("FAILED: thread stuck\n");
-        return 1;
+        printf("FAILED\n");
     }
+    
+    return 0;
 }

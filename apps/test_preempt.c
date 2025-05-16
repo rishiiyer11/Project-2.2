@@ -3,7 +3,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#include <uthread.h>
+#include "uthread.h"
+#include "private.h"
 
 /*
 Resources:
@@ -65,8 +66,8 @@ int main(void) {
     int TID2 = 2;
     int thread1, thread2;
 
-    // start sched
-    uthread_start(true);
+    // start pre
+    preempt_start(true);
     
     // create threads
     thread1 = uthread_create(tFunc, &TID1);
@@ -85,8 +86,8 @@ int main(void) {
     while (completed < 2) {
     }
     
-    // stop sched
-    uthread_stop();
+    // stop pre
+    preempt_stop();
     
     // print
     printf("first %d thread switch:\n", seqIndex);

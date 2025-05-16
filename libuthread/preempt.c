@@ -14,17 +14,12 @@
 Resources:
 https://stackoverflow.com/questions/3417837/best-way-to-suppress-c-warning-unused-variable-x
 https://www.geeksforgeeks.org/preemptive-and-non-preemptive-scheduling/
-https://man7.org/linux/man-pages/man2/sigaction.2.html
-https://man7.org/linux/man-pages/man2/setitimer.2.html
-https://hpc-tutorials.llnl.gov/posix/
-https://pages.cs.wisc.edu/~remzi/Classes/537/Fall2008/Projects/p2a.html
 */
 
 /*
  * Frequency of preemption
  * 100Hz is 100 times per second
-*/
-
+ */
 #define HZ 100
 #define USEC_PER_SEC 1000000
 

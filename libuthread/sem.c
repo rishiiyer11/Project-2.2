@@ -58,7 +58,9 @@ int sem_down(sem_t sem)
     if (sem->count < 0) {
         /* block until we really have the resource */
         queue_enqueue(sem->wait_queue, uthread_current());
+        preempt_enable();
         uthread_block();
+        preempt_disable();
     }
 
     preempt_enable();
